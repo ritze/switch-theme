@@ -171,8 +171,8 @@ def switch_theme(input_theme, verbose=0):
     """
 
     theme = input_to_theme_map[input_theme]
-    if verbose == 1:
-        print("Switching to {}...".format(theme.__name__))
+    if verbose >= 1:
+        print("switching to {}...".format(theme.__name__))
 
     return 0
 
