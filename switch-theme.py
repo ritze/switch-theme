@@ -127,6 +127,10 @@ input_to_theme_map = {
 }
 
 
+def print_error(*args):
+    print("{}error:{}".format("\033[1;91m", "\033[0m"), *args)
+
+
 def sed(pattern, replace, file, count=0):
     """Replace certain pattern in a file.
 
@@ -162,6 +166,68 @@ def sed(pattern, replace, file, count=0):
     shutil.move(temp, file)
 
 
+class Replacement:
+    file = None
+    pattern = None
+    replace = None
+
+    def __init__(self, file, pattern, replace):
+        self.file = file
+        self.pattern = pattern
+        self.replace = replace
+
+
+class App:
+    name = None
+    replacement = None
+
+
+class Alacritty(App):
+    name = "Alacritty"
+    replacement = Replacement(
+        file="/home/mlu/.config/alacritty/alacritty.toml",
+        pattern='^(import = \\[".*)\\/.*.toml*',
+        replace="\\1/{}.toml",
+    )
+
+
+def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
+    """Switch the theme of an application.
+
+    Args:
+        app (str):              the application
+        theme (str):            the theme to switch to
+        verbose (int):          the verbosity level with 0 for no messages
+        suppress_errors (bool): supress error messages
+    """
+
+    ret = 0
+
+    if verbose >= 2:
+        print("setting {} to {}...".format(app.name, theme))
+
+    if app.replacement:
+        file = app.replacement.file
+        pattern = app.replacement.pattern
+        replace = app.replacement.replace.format(theme)
+
+        if verbose >= 3:
+            print("  file:    {}".format(file))
+            print('  pattern: "{}"'.format(pattern))
+            print('  replace: "{}"'.format(replace))
+
+        try:
+            sed(pattern, replace, file)
+        except FileNotFoundError:
+            if not suppress_errors:
+                print_error(
+                    "couldn't set {} to {}: {} not found".format(app.name, theme, file)
+                )
+            ret = 1
+
+    return ret
+
+
 def switch_theme(input_theme, verbose=0):
     """Switch the theme to input_theme.
 
@@ -174,7 +240,10 @@ def switch_theme(input_theme, verbose=0):
     if verbose >= 1:
         print("switching to {}...".format(theme.__name__))
 
-    return 0
+    ret = 0
+    ret += switch_app_theme(Alacritty, theme.alacritty, verbose)
+
+    return 1 if ret > 0 else 0
 
 
 def main():
