@@ -1,6 +1,9 @@
 #!/bin/python3
 
 import argparse
+import re
+import shutil
+from tempfile import mkstemp
 
 
 class Theme:
@@ -113,6 +116,41 @@ input_to_theme_map = {
     "onehalf-dark": OnehalfDarkTheme,
     "onehalf-light": OnehalfLightTheme,
 }
+
+
+def sed(pattern, replace, file, count=0):
+    """Replace certain pattern in a file.
+
+    In each line, replaces 'pattern' with 'replace'.
+
+    Args:
+        pattern (str): the pattern to match (can be re.pattern)
+        replace (str): the replacement string
+        file (str):    the path to file
+        count (int):   the number of occurrences to replace
+    """
+
+    num_replaced = count
+    source_fd = open(file, "r")
+
+    _, temp = mkstemp()
+    dest_fd = open(temp, "w")
+
+    for line in source_fd:
+        new_line = re.sub(pattern, replace, line)
+        dest_fd.write(new_line)
+
+        if new_line != line:
+            num_replaced += 1
+        if count and num_replaced > count:
+            break
+
+    dest_fd.writelines(source_fd.readlines())
+
+    source_fd.close()
+    dest_fd.close()
+
+    shutil.move(temp, file)
 
 
 def switch_theme(input_theme, verbose=0):
