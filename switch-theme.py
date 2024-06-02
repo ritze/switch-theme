@@ -6,6 +6,15 @@ import shutil
 from tempfile import mkstemp
 
 
+"""Script to switch themes for different applications at once
+
+The data structures are split into Themes and App.
+A Theme stores the data: the used theme for each application
+An App stores the action: what must be done to change the theme for this application.
+
+"""
+
+
 class Theme:
     """Base class for themes
 
@@ -154,6 +163,13 @@ def sed(pattern, replace, file, count=0):
 
 
 def switch_theme(input_theme, verbose=0):
+    """Switch the theme to input_theme.
+
+    Args:
+        input_theme (str): the theme to switch to
+        verbose (int):     the verbosity level with 0 for no messages
+    """
+
     theme = input_to_theme_map[input_theme]
     if verbose == 1:
         print("Switching to {}...".format(theme.__name__))
