@@ -3,8 +3,12 @@
 import argparse
 
 
-# This theme includes fallback themes and shouldn't be used directly.
 class Theme:
+    """Base class for themes
+
+    This class includes fallback themes. Don't use it directly.
+    """
+
     alacritty = None
     gtk = None
     gnome_color_scheme = None
@@ -13,8 +17,12 @@ class Theme:
     vscode = None
 
 
-# This theme includes fallback themes and shouldn't be used directly.
 class DarkTheme(Theme):
+    """Base class for dark themes
+
+    This class includes fallback themes. Don't use it directly.
+    """
+
     alacritty = "ayu-dark"
     gtk = "Adwaita-dark"
     gnome_color_scheme = "prefer-dark"
@@ -22,8 +30,12 @@ class DarkTheme(Theme):
     vscode = "Default Dark Modern"
 
 
-# This theme includes fallback themes and shouldn't be used directly.
 class LightTheme(Theme):
+    """Base class for light themes
+
+    This class includes fallback themes. Don't use it directly.
+    """
+
     alacritty = "onehalf-light"
     gtk = "Adwaita"
     gnome_color_scheme = "prefer-light"
