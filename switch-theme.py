@@ -4,6 +4,7 @@ import argparse
 import re
 import shutil
 import subprocess
+from os.path import expanduser
 from tempfile import mkstemp
 
 
@@ -187,7 +188,7 @@ class App:
 class Alacritty(App):
     name = "Alacritty"
     replacement = Replacement(
-        file="/home/mlu/.config/alacritty/alacritty.toml",
+        file="~/.config/alacritty/alacritty.toml",
         pattern='^(import = \\[".*)\\/.*.toml*',
         replace="\\1/{}.toml",
     )
@@ -196,7 +197,7 @@ class Alacritty(App):
 class CodeOSS(App):
     name = "Code OSS"
     replacement = Replacement(
-        file="/home/mlu/.config/Code - OSS/User/settings.json",
+        file="~/.config/Code - OSS/User/settings.json",
         pattern='"workbench.colorTheme":.*',
         replace='"workbench.colorTheme": "{}"',
     )
@@ -215,7 +216,7 @@ class Gtk(App):
 class Rofi(App):
     name = "rofi"
     replacement = Replacement(
-        file="/home/mlu/.config/rofi/config.rasi",
+        file="~/.config/rofi/config.rasi",
         pattern='@theme ".*',
         replace='@theme "{}"',
     )
@@ -224,7 +225,7 @@ class Rofi(App):
 class Speedcrunch(App):
     name = "SpeedCrunch"
     replacement = Replacement(
-        file="/home/mlu/.config/SpeedCrunch/SpeedCrunch.ini",
+        file="~/.config/SpeedCrunch/SpeedCrunch.ini",
         pattern="^Display\\\\ColorSchemeName=.*",
         replace="Display\\\\ColorSchemeName={}",
     )
@@ -233,7 +234,7 @@ class Speedcrunch(App):
 class VSCode(App):
     name = "Visual Studio Code"
     replacement = Replacement(
-        file="/home/mlu/.config/Code/User/settings.json",
+        file="~/.config/Code/User/settings.json",
         pattern='"workbench.colorTheme":.*',
         replace='"workbench.colorTheme": "{}"',
     )
@@ -255,7 +256,7 @@ def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
         print("setting {} to {}...".format(app.name, theme))
 
     if app.replacement:
-        file = app.replacement.file
+        file = expanduser(app.replacement.file)
         pattern = app.replacement.pattern
         replace = app.replacement.replace.format(theme)
 
