@@ -191,6 +191,24 @@ class Alacritty(App):
     )
 
 
+class CodeOSS(App):
+    name = "Code OSS"
+    replacement = Replacement(
+        file="/home/mlu/.config/Code - OSS/User/settings.json",
+        pattern='"workbench.colorTheme":.*',
+        replace='"workbench.colorTheme": "{}"',
+    )
+
+
+class VSCode(App):
+    name = "Visual Studio Code"
+    replacement = Replacement(
+        file="/home/mlu/.config/Code/User/settings.json",
+        pattern='"workbench.colorTheme":.*',
+        replace='"workbench.colorTheme": "{}"',
+    )
+
+
 def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
     """Switch the theme of an application.
 
@@ -242,6 +260,8 @@ def switch_theme(input_theme, verbose=0):
 
     ret = 0
     ret += switch_app_theme(Alacritty, theme.alacritty, verbose)
+    ret += switch_app_theme(CodeOSS, theme.vscode, verbose)
+    ret += switch_app_theme(VSCode, theme.vscode, verbose)
 
     return 1 if ret > 0 else 0
 
