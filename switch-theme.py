@@ -26,7 +26,7 @@ class Theme:
     alacritty = None
     codeoss = None
     gtk = None
-    gnome_color_scheme = None
+    gnomecolorscheme = None
     rofi = "spotlight-dark"
     speedcrunch = None
     vscode = None
@@ -41,7 +41,7 @@ class DarkTheme(Theme):
     alacritty = "ayu-dark"
     codeoss = "Default Dark Modern"
     gtk = "Adwaita-dark"
-    gnome_color_scheme = "prefer-dark"
+    gnomecolorscheme = "prefer-dark"
     speedcrunch = "Tomorrow Night"
     vscode = "Default Dark Modern"
 
@@ -55,7 +55,7 @@ class LightTheme(Theme):
     alacritty = "onehalf-light"
     codeoss = "Atom One Light"
     gtk = "Adwaita"
-    gnome_color_scheme = "prefer-light"
+    gnomecolorscheme = "prefer-light"
     speedcrunch = "Standard"
     vscode = "Atom One Light"
 
@@ -314,7 +314,7 @@ def switch_theme(input_theme, verbose=0):
     ret += switch_app_theme(Alacritty, theme.alacritty, verbose)
     ret += switch_app_theme(CodeOSS, theme.codeoss, verbose)
     ret += switch_app_theme(Gtk, theme.gtk, verbose)
-    ret += switch_app_theme(GnomeColorScheme, theme.gnome_color_scheme, verbose)
+    ret += switch_app_theme(GnomeColorScheme, theme.gnomecolorscheme, verbose)
     ret += switch_app_theme(Rofi, theme.rofi, verbose)
     ret += switch_app_theme(Speedcrunch, theme.speedcrunch, verbose)
     ret += switch_app_theme(VSCode, theme.vscode, verbose)
