@@ -3,6 +3,7 @@
 import argparse
 import re
 import shutil
+import subprocess
 from tempfile import mkstemp
 
 
@@ -180,6 +181,7 @@ class Replacement:
 class App:
     name = None
     replacement = None
+    command = None
 
 
 class Alacritty(App):
@@ -198,6 +200,16 @@ class CodeOSS(App):
         pattern='"workbench.colorTheme":.*',
         replace='"workbench.colorTheme": "{}"',
     )
+
+
+class GnomeColorScheme(App):
+    name = "GNOME Color Scheme"
+    command = "gsettings set org.gnome.desktop.interface color-scheme"
+
+
+class Gtk(App):
+    name = "GTK"
+    command = "gsettings set org.gnome.desktop.interface gtk-theme"
 
 
 class Rofi(App):
@@ -261,6 +273,20 @@ def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
                 )
             ret = 1
 
+    if app.command:
+        command = app.command.split(" ") + [theme]
+        error = False
+
+        try:
+            ps = subprocess.run(command)
+            if ps.returncode:
+                error = True
+        except FileNotFoundError:
+            error = True
+        if error and not suppress_errors:
+            print_error("couldn't successfully run: {}".format(command))
+            ret = 1
+
     return ret
 
 
@@ -279,6 +305,8 @@ def switch_theme(input_theme, verbose=0):
     ret = 0
     ret += switch_app_theme(Alacritty, theme.alacritty, verbose)
     ret += switch_app_theme(CodeOSS, theme.vscode, verbose)
+    ret += switch_app_theme(Gtk, theme.gtk, verbose)
+    ret += switch_app_theme(GnomeColorScheme, theme.gnome_color_scheme, verbose)
     ret += switch_app_theme(Rofi, theme.rofi, verbose)
     ret += switch_app_theme(Speedcrunch, theme.speedcrunch, verbose)
     ret += switch_app_theme(VSCode, theme.vscode, verbose)
