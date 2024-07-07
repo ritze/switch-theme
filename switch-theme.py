@@ -209,6 +209,15 @@ class Rofi(App):
     )
 
 
+class Speedcrunch(App):
+    name = "SpeedCrunch"
+    replacement = Replacement(
+        file="/home/mlu/.config/SpeedCrunch/SpeedCrunch.ini",
+        pattern="^Display\\\\ColorSchemeName=.*",
+        replace="Display\\\\ColorSchemeName={}",
+    )
+
+
 class VSCode(App):
     name = "Visual Studio Code"
     replacement = Replacement(
@@ -271,6 +280,7 @@ def switch_theme(input_theme, verbose=0):
     ret += switch_app_theme(Alacritty, theme.alacritty, verbose)
     ret += switch_app_theme(CodeOSS, theme.vscode, verbose)
     ret += switch_app_theme(Rofi, theme.rofi, verbose)
+    ret += switch_app_theme(Speedcrunch, theme.speedcrunch, verbose)
     ret += switch_app_theme(VSCode, theme.vscode, verbose)
 
     return 1 if ret > 0 else 0
