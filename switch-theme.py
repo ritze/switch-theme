@@ -259,13 +259,15 @@ def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
 
     ret = 0
 
+    app_theme = getattr(theme, app.__name__.lower())
+
     if verbose >= 2:
-        print("setting {} to {}...".format(app.name, theme))
+        print("setting {} to {}...".format(app.name, app_theme))
 
     if app.replacement:
         file = expanduser(app.replacement.file)
         pattern = app.replacement.pattern
-        replace = app.replacement.replace.format(theme)
+        replace = app.replacement.replace.format(app_theme)
 
         if verbose >= 3:
             print("  file:    {}".format(file))
@@ -277,12 +279,14 @@ def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
         except FileNotFoundError:
             if not suppress_errors:
                 print_error(
-                    "couldn't set {} to {}: {} not found".format(app.name, theme, file)
+                    "couldn't set {} to {}: {} not found".format(
+                        app.name, app_theme, file
+                    )
                 )
             ret = 1
 
     if app.command:
-        command = app.command.split(" ") + [theme]
+        command = app.command.split(" ") + [app_theme]
         error = False
 
         try:
@@ -311,13 +315,13 @@ def switch_theme(input_theme, verbose=0):
         print("switching to {}...".format(theme.__name__))
 
     ret = 0
-    ret += switch_app_theme(Alacritty, theme.alacritty, verbose)
-    ret += switch_app_theme(CodeOSS, theme.codeoss, verbose)
-    ret += switch_app_theme(Gtk, theme.gtk, verbose)
-    ret += switch_app_theme(GnomeColorScheme, theme.gnomecolorscheme, verbose)
-    ret += switch_app_theme(Rofi, theme.rofi, verbose)
-    ret += switch_app_theme(Speedcrunch, theme.speedcrunch, verbose)
-    ret += switch_app_theme(VSCode, theme.vscode, verbose)
+    ret += switch_app_theme(Alacritty, theme, verbose)
+    ret += switch_app_theme(CodeOSS, theme, verbose)
+    ret += switch_app_theme(Gtk, theme, verbose)
+    ret += switch_app_theme(GnomeColorScheme, theme, verbose)
+    ret += switch_app_theme(Rofi, theme, verbose)
+    ret += switch_app_theme(Speedcrunch, theme, verbose)
+    ret += switch_app_theme(VSCode, theme, verbose)
 
     return 1 if ret > 0 else 0
 
