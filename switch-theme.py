@@ -187,13 +187,11 @@ class Replacement:
 
 
 class App:
-    name = None
     replacement = None
     command = None
 
 
 class Alacritty(App):
-    name = "Alacritty"
     replacement = Replacement(
         file="~/.config/alacritty/alacritty.toml",
         pattern='^(import = \\[".*)\\/.*.toml*',
@@ -202,7 +200,6 @@ class Alacritty(App):
 
 
 class CodeOSS(App):
-    name = "Code OSS"
     replacement = Replacement(
         file="~/.config/Code - OSS/User/settings.json",
         pattern='"workbench.colorTheme":.*',
@@ -211,17 +208,14 @@ class CodeOSS(App):
 
 
 class GnomeColorScheme(App):
-    name = "GNOME Color Scheme"
     command = "gsettings set org.gnome.desktop.interface color-scheme"
 
 
 class Gtk(App):
-    name = "GTK"
     command = "gsettings set org.gnome.desktop.interface gtk-theme"
 
 
 class Rofi(App):
-    name = "rofi"
     replacement = Replacement(
         file="~/.config/rofi/config.rasi",
         pattern='@theme ".*',
@@ -230,7 +224,6 @@ class Rofi(App):
 
 
 class Speedcrunch(App):
-    name = "SpeedCrunch"
     replacement = Replacement(
         file="~/.config/SpeedCrunch/SpeedCrunch.ini",
         pattern="^Display\\\\ColorSchemeName=.*",
@@ -239,7 +232,6 @@ class Speedcrunch(App):
 
 
 class VSCode(App):
-    name = "Visual Studio Code"
     replacement = Replacement(
         file="~/.config/Code/User/settings.json",
         pattern='"workbench.colorTheme":.*',
@@ -270,10 +262,11 @@ def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
 
     ret = 0
 
-    app_theme = getattr(theme, app.__name__.lower())
+    app_name = app.__name__.lower()
+    app_theme = getattr(theme, app_name)
 
     if verbose >= 2:
-        print("setting {} to {}...".format(app.name, app_theme))
+        print("setting {} to {}...".format(app_name, app_theme))
 
     if app.replacement:
         file = expanduser(app.replacement.file)
@@ -291,7 +284,7 @@ def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
             if not suppress_errors:
                 print_error(
                     "couldn't set {} to {}: {} not found".format(
-                        app.name, app_theme, file
+                        app_name, app_theme, file
                     )
                 )
             ret = 1
