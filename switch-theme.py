@@ -247,6 +247,17 @@ class VSCode(App):
     )
 
 
+apps = [
+    Alacritty,
+    CodeOSS,
+    Gtk,
+    GnomeColorScheme,
+    Rofi,
+    Speedcrunch,
+    VSCode,
+]
+
+
 def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
     """Switch the theme of an application.
 
@@ -315,13 +326,9 @@ def switch_theme(input_theme, verbose=0):
         print("switching to {}...".format(theme.__name__))
 
     ret = 0
-    ret += switch_app_theme(Alacritty, theme, verbose)
-    ret += switch_app_theme(CodeOSS, theme, verbose)
-    ret += switch_app_theme(Gtk, theme, verbose)
-    ret += switch_app_theme(GnomeColorScheme, theme, verbose)
-    ret += switch_app_theme(Rofi, theme, verbose)
-    ret += switch_app_theme(Speedcrunch, theme, verbose)
-    ret += switch_app_theme(VSCode, theme, verbose)
+
+    for app in apps:
+        ret += switch_app_theme(app, theme, verbose)
 
     return 1 if ret > 0 else 0
 
