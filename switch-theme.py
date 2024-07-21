@@ -1,9 +1,11 @@
 #!/bin/python3
 
 import argparse
+import pprint
 import re
 import shutil
 import subprocess
+import tomllib
 from os.path import expanduser
 from tempfile import mkstemp
 
@@ -15,125 +17,6 @@ A Theme stores the data: the used theme for each application
 An App stores the action: what must be done to change the theme for this application.
 
 """
-
-
-class Theme:
-    """Base class for themes
-
-    This class includes fallback themes. Don't use it directly.
-    """
-
-    alacritty = None
-    codeoss = None
-    gtk = None
-    gnomecolorscheme = None
-    rofi = "spotlight-dark"
-    speedcrunch = None
-    vscode = None
-
-
-class DarkTheme(Theme):
-    """Base class for dark themes
-
-    This class includes fallback themes. Don't use it directly.
-    """
-
-    alacritty = "ayu-dark"
-    codeoss = "Default Dark Modern"
-    gtk = "Adwaita-dark"
-    gnomecolorscheme = "prefer-dark"
-    speedcrunch = "Tomorrow Night"
-    vscode = "Default Dark Modern"
-
-
-class LightTheme(Theme):
-    """Base class for light themes
-
-    This class includes fallback themes. Don't use it directly.
-    """
-
-    alacritty = "onehalf-light"
-    codeoss = "Atom One Light"
-    gtk = "Adwaita"
-    gnomecolorscheme = "prefer-light"
-    speedcrunch = "Standard"
-    vscode = "Atom One Light"
-
-
-# This theme includes fallback themes and shouldn't be used directly.
-# class DimmedDarkTheme(DarkTheme):
-#     alacritty = "onehalf-dark"  # fallback
-
-
-# This theme includes fallback themes and shouldn't be used directly.
-# class DimmedLightTheme(LightTheme):
-#     alacritty = "gruvbox-light"  # fallback
-
-
-class AyuDarkTheme(DarkTheme):
-    alacritty = "ayu-dark"
-
-    def __str__(self):
-        return "Ayu Dark"
-
-    def __repr__(self):
-        return "REPR: Ayu Dark"
-
-
-class AyuLightTheme(LightTheme):
-    alacritty = "ayu-light"
-
-
-# class AyuMirageTheme:
-#    alacritty = "ayu-mirage"
-
-
-class GruvboxDarkTheme(DarkTheme):
-    alacritty = "gruvbox-dark"
-    codeoss = "Gruvbox Material Dark"
-    vscode = "Gruvbox Material Dark"
-
-
-class GruvboxLightTheme(LightTheme):
-    alacritty = "gruvbox-light"
-    codeoss = "Gruvbox Material Light"
-    vscode = "Gruvbox Material Light"
-
-
-class OnehalfDarkTheme(DarkTheme):
-    alacritty = "onehalf-dark"
-    codeoss = "Atom One Dark"
-    vscode = "Atom One Dark"
-
-
-class OnehalfLightTheme(LightTheme):
-    alacritty = "onehalf-light"
-    codeoss = "Atom One Light"
-    vscode = "Atom One Light"
-
-
-# Don't use the directly the (Dimmed) DarkTheme or (Dimmed) LightTheme. Those are used
-# for fallback values for the actual themes. Only map concrete themes here.
-input_to_theme_map = {
-    # dark mode
-    "d": AyuDarkTheme,
-    "dark": AyuDarkTheme,
-    # dimmed light mode
-    "L": GruvboxLightTheme,
-    "dimmed-light": GruvboxLightTheme,
-    # light mode
-    "l": OnehalfLightTheme,
-    "light": OnehalfLightTheme,
-    # dimmed dark mode
-    "D": OnehalfDarkTheme,
-    "dimmed-dark": GruvboxDarkTheme,
-    # themes
-    "ayu-dark": AyuDarkTheme,
-    "gruvbox-dark": GruvboxDarkTheme,
-    "gruvbox-light": GruvboxLightTheme,
-    "onehalf-dark": OnehalfDarkTheme,
-    "onehalf-light": OnehalfLightTheme,
-}
 
 
 def print_error(*args):
@@ -175,103 +58,26 @@ def sed(pattern, replace, file, count=0):
     shutil.move(temp, file)
 
 
-class Replacement:
-    file = None
-    pattern = None
-    replace = None
-
-    def __init__(self, file, pattern, replace):
-        self.file = file
-        self.pattern = pattern
-        self.replace = replace
-
-
-class App:
-    replacement = None
-    command = None
-
-
-class Alacritty(App):
-    replacement = Replacement(
-        file="~/.config/alacritty/alacritty.toml",
-        pattern='^(import = \\[".*)\\/.*.toml*',
-        replace="\\1/{}.toml",
-    )
-
-
-class CodeOSS(App):
-    replacement = Replacement(
-        file="~/.config/Code - OSS/User/settings.json",
-        pattern='"workbench.colorTheme":.*',
-        replace='"workbench.colorTheme": "{}"',
-    )
-
-
-class GnomeColorScheme(App):
-    command = "gsettings set org.gnome.desktop.interface color-scheme"
-
-
-class Gtk(App):
-    command = "gsettings set org.gnome.desktop.interface gtk-theme"
-
-
-class Rofi(App):
-    replacement = Replacement(
-        file="~/.config/rofi/config.rasi",
-        pattern='@theme ".*',
-        replace='@theme "{}"',
-    )
-
-
-class Speedcrunch(App):
-    replacement = Replacement(
-        file="~/.config/SpeedCrunch/SpeedCrunch.ini",
-        pattern="^Display\\\\ColorSchemeName=.*",
-        replace="Display\\\\ColorSchemeName={}",
-    )
-
-
-class VSCode(App):
-    replacement = Replacement(
-        file="~/.config/Code/User/settings.json",
-        pattern='"workbench.colorTheme":.*',
-        replace='"workbench.colorTheme": "{}"',
-    )
-
-
-apps = [
-    Alacritty,
-    CodeOSS,
-    Gtk,
-    GnomeColorScheme,
-    Rofi,
-    Speedcrunch,
-    VSCode,
-]
-
-
-def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
+def switch_app_theme(app, theme, strategy, verbose=0, suppress_errors=False):
     """Switch the theme of an application.
 
     Args:
-        app (str):              the application
+        app (str):              the application name
         theme (str):            the theme to switch to
+        strategy (dict):        the strategy how to change the theme
         verbose (int):          the verbosity level with 0 for no messages
         suppress_errors (bool): supress error messages
     """
 
     ret = 0
 
-    app_name = app.__name__.lower()
-    app_theme = getattr(theme, app_name)
-
     if verbose >= 2:
-        print("setting {} to {}...".format(app_name, app_theme))
+        print("setting {} to {}...".format(app, theme))
 
-    if app.replacement:
-        file = expanduser(app.replacement.file)
-        pattern = app.replacement.pattern
-        replace = app.replacement.replace.format(app_theme)
+    if "file" in strategy and "pattern" in strategy and "replace" in strategy:
+        file = expanduser(strategy["file"])
+        pattern = strategy["pattern"]
+        replace = strategy["replace"].format(theme)
 
         if verbose >= 3:
             print("  file:    {}".format(file))
@@ -283,14 +89,12 @@ def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
         except FileNotFoundError:
             if not suppress_errors:
                 print_error(
-                    "couldn't set {} to {}: {} not found".format(
-                        app_name, app_theme, file
-                    )
+                    "couldn't set {} to {}: {} not found".format(app, theme, file)
                 )
             ret = 1
 
-    if app.command:
-        command = app.command.split(" ") + [app_theme]
+    if "command" in strategy:
+        command = strategy["command"].split(" ") + [theme]
         error = False
 
         try:
@@ -306,24 +110,110 @@ def switch_app_theme(app, theme, verbose=0, suppress_errors=False):
     return ret
 
 
-def switch_theme(input_theme, verbose=0):
+def switch_theme(apps, themes, verbose=0):
     """Switch the theme to input_theme.
 
     Args:
-        input_theme (str): the theme to switch to
-        verbose (int):     the verbosity level with 0 for no messages
+        apps (dict):   the applications
+        themes (dict): the themes
+        verbose (int): the verbosity level with 0 for no messages
     """
-
-    theme = input_to_theme_map[input_theme]
-    if verbose >= 1:
-        print("switching to {}...".format(theme.__name__))
 
     ret = 0
 
-    for app in apps:
-        ret += switch_app_theme(app, theme, verbose)
+    if verbose >= 4:
+        print("used apps configuration:")
+        pprint.pprint(apps)
+        print("used themes configuration:")
+        pprint.pprint(themes)
+
+    for app, strategy in apps.items():
+        ret += switch_app_theme(app, themes[app], strategy, verbose)
 
     return 1 if ret > 0 else 0
+
+
+def validate_config(config, verbose=0):
+    """Validate if config only includes the categories as first level fields
+       and all fields of aliases point to an available theme.
+
+    Args:
+        config (dict):     the config
+        verbose (int):     the verbosity level with 0 for no messages
+    """
+
+    categories = ["aliases", "apps", "themes"]
+
+    ret = True
+
+    for key in categories:
+        if key not in config.keys():
+            if verbose >= 1:
+                print('config invalid: "{}" not found'.format(key))
+            ret = False
+
+    for key in config.keys():
+        if not key in categories:
+            if verbose >= 1:
+                print('config invalid: unknown field "{}"'.format(key))
+            ret = False
+
+    if "aliases" in config.keys() and "themes" in config.keys():
+        for alias in config["aliases"].keys():
+            theme = config["aliases"][alias]
+            if not theme in config["themes"]:
+                if verbose >= 1:
+                    print(
+                        'config invalid: unknown theme "{}" provided by alias "{}"'.format(
+                            theme, alias
+                        )
+                    )
+                ret = False
+
+    return ret
+
+
+def validate_theme_config(config, apps, verbose=0):
+    """Validate if each theme covers each application
+
+    Args:
+        config (dict): the config
+        apps (dict):   the applications
+        verbose (int): the verbosity level with 0 for no messages
+    """
+
+    ret = True
+
+    for key in apps.keys():
+        if not key in config.keys():
+            if verbose >= 1:
+                print('config invalid: theme for "{}" not found'.format(key))
+            ret = False
+
+    return ret
+
+
+def get_theme_config(config, theme, verbose=0):
+    """Return the theme from config as a dict.
+
+    If a field is not set, the value of the fallback theme will be taken. This behavior is not transitive.
+
+    Args:
+        config (dict): the config
+        theme:         the theme name
+        verbose (int): the verbosity level with 0 for no messages
+    """
+
+    theme_config = config["themes"][theme]
+
+    if "fallback" in theme_config.keys():
+        fallback_config = config["themes"][theme_config["fallback"]]
+        for key, value in fallback_config.items():
+            if not key in theme_config:
+                theme_config[key] = value
+        del theme_config["fallback"]
+
+    return theme_config
 
 
 def main():
@@ -336,30 +226,20 @@ def main():
         "-v", "--verbose", action="count", default=0, help="increase verbosity"
     )
 
-    # TODO: Add better usage text
-    parser.add_argument(
-        "theme",
-        choices=[
-            # light mode
-            "l",
-            "light",
-            # dimmed light mode
-            "L",
-            "dimmed-light",
-            # dimmed dark mode
-            "D",
-            "dimmed-dark",
-            # dark mode
-            "d",
-            "dark",
-            # themes
-            "ayu-dark",
-            "gruvbox-light",
-            "onehalf-dark",
-            "onehalf-light",
-        ],
-        help="test",
-    )
+    config = expanduser("~/.config/switch-theme/switch-theme.toml")
+    with open(config, "rb") as file:
+        config = tomllib.load(file)
+
+    # Set verbose to 1 since the arguments cannot be parsed at this point
+    if not validate_config(config, verbose=1):
+        print_error("invalid config: missing fields")
+        exit(1)
+
+    themes = list(config["aliases"])
+    [themes.append(x) for x in list(config["themes"]) if x not in themes]
+    themes.sort()
+
+    parser.add_argument("theme", choices=themes)
 
     try:
         args = parser.parse_args()
@@ -367,7 +247,24 @@ def main():
         parser.print_help()
         exit(9)
 
-    ret = switch_theme(args.theme, verbose=args.verbose)
+    if args.verbose >= 5:
+        print("parsed config:")
+        pprint.pprint(config)
+
+    theme = args.theme
+    if theme in config["aliases"]:
+        theme = config["aliases"][theme]
+
+    theme_config = get_theme_config(config, theme, args.verbose)
+
+    if not validate_theme_config(theme_config, config["apps"], verbose=args.verbose):
+        print_error('invalid config: missing fields for theme "{}"'.format(theme))
+        exit(1)
+
+    if args.verbose >= 1:
+        print("switching to {}...".format(theme))
+
+    ret = switch_theme(config["apps"], theme_config, verbose=args.verbose)
 
     exit(ret)
 
