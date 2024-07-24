@@ -223,7 +223,10 @@ def main():
         prog=prog, description="Set the themes for Gtk and specific applications."
     )
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="increase verbosity"
+        "-v", "--verbose",
+        action="count",
+        default=0,
+        help="increase verbosity, multiple -v options increase the verbosity",
     )
 
     config = expanduser("~/.config/switch-theme/switch-theme.toml")
