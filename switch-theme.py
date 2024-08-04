@@ -216,14 +216,39 @@ def get_theme_config(config, theme, verbose=0):
     return theme_config
 
 
+class ListChoicesHelpFormatter(argparse.HelpFormatter):
+    def _metavar_formatter(self, action, default_metavar):
+        if action.metavar is not None:
+            result = action.metavar
+        elif action.choices is not None:
+            choice_strs = [str(choice) for choice in action.choices]
+            result = '%s' % '\n  '.join(choice_strs)
+        else:
+            result = default_metavar
+
+        def format(tuple_size):
+            if isinstance(result, tuple):
+                return result
+            else:
+                return (result, ) * tuple_size
+        return format
+
+
 def main():
     prog = __file__.split("/")[-1]
 
     parser = argparse.ArgumentParser(
-        prog=prog, description="Set the themes for Gtk and specific applications."
+        prog=prog,
+        usage="%(prog)s [options] [theme]",
+        description="Set the themes for Gtk and specific applications.",
+        formatter_class=ListChoicesHelpFormatter,
     )
+
     parser.add_argument(
-        "-v", "--verbose", action="count", default=0, help="increase verbosity"
+        "-v", "--verbose",
+        action="count",
+        default=0,
+        help="increase verbosity, multiple -v options increase the verbosity",
     )
 
     config = expanduser("~/.config/switch-theme/switch-theme.toml")
@@ -238,6 +263,9 @@ def main():
     themes = list(config["aliases"])
     [themes.append(x) for x in list(config["themes"]) if x not in themes]
     themes.sort()
+
+    # This will overwrite an undocumented private API, which might break in the future
+    parser._positionals.title = 'themes'
 
     parser.add_argument("theme", choices=themes)
 
