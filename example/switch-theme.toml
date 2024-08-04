@@ -1,0 +1,117 @@
+[aliases]
+light        = "onehalf-light"
+dark         = "ayu-dark"
+dimmed-light = "gruvbox-light"
+dimmed-dark  = "onehalf-dark"
+
+[themes.dark]
+alacritty        = "ayu-dark"
+bat              = "OneHalfDark"
+codeoss          = "Default Dark Modern"
+fzf              = "prompt:3,pointer:3,fg+:7,bg+:0"
+gtk              = "Adwaita-dark"
+gnomecolorscheme = "prefer-dark"
+rofi             = "spotlight-dark"
+speedcrunch      = "Tomorrow Night"
+vscode           = "Default Dark Modern"
+
+[themes.light]
+alacritty        = "onehalf-light"
+bat              = "OneHalfLight"
+codeoss          = "Atom One Light"
+fzf              = "prompt:0,pointer:3,fg+:7,bg+:0"
+gtk              = "Adwaita"
+gnomecolorscheme = "prefer-light"
+rofi             = "spotlight-dark"
+speedcrunch      = "Standard"
+vscode           = "Atom One Light"
+
+[themes.ayu-dark]
+fallback  = "dark"
+alacritty = "ayu-dark"
+fzf       = "prompt:3,pointer:#dfdac4,fg+:#dfdac4,bg+:#1a2129"
+
+[themes.ayu-light]
+fallback  = "light"
+alacritty = "ayu-light"
+fzf       = "prompt:0,pointer:8,fg+:8,bg+:#f0eee4"
+
+[themes.ayu-mirage]
+fallback  = "dark"
+alacritty = "ayu-mirage"
+fzf       = "prompt:3,pointer:#dfdac4,fg+:#dfdac4,bg+:#343f4c"
+
+[themes.gruvbox-dark]
+fallback  = "dark"
+alacritty = "gruvbox-dark"
+bat       = "gruvbox-dark"
+codeoss   = "Gruvbox Material Dark"
+fzf       = "prompt:3,pointer:#d8a657,fg+:#f7ddb1"
+vscode    = "Gruvbox Material Dark"
+
+[themes.gruvbox-light]
+fallback  = "light"
+alacritty = "gruvbox-light"
+bat       = "gruvbox-light"
+codeoss   = "Gruvbox Material Light"
+fzf       = "prompt:3,pointer:#3c3836,fg+:#3c3836,bg+:#d9c098"
+vscode    = "Gruvbox Material Light"
+
+[themes.onehalf-dark]
+fallback  = "dark"
+alacritty = "onehalf-dark"
+bat       = "OneHalfDark"
+codeoss   = "Atom One Dark"
+fzf       = "prompt:#e3e4e1,pointer:#e3e4e1,fg+:#e3e4e1,bg+:#373c47"
+vscode    = "Atom One Dark"
+
+[themes.onehalf-light]
+fallback  = "light"
+alacritty = "onehalf-light"
+bat       = "OneHalfLight"
+codeoss   = "Atom One Light"
+fzf       = "prompt:3,pointer:8,fg+:8,bg+:#f4eac8"
+vscode    = "Atom One Light"
+
+
+[apps.alacritty]
+file    = "~/.config/alacritty/alacritty.toml"
+pattern = "^(import = \\[\".*)\\/.*.toml*"
+replace = "\\1/{}.toml"
+
+[apps.bat]
+file    = "~/.config/fish/functions/bat.fish"
+pattern = ' --theme=.* '
+replace = ' --theme="{}" '
+
+[apps.codeoss]
+file    = "~/.config/Code - OSS/User/settings.json"
+pattern = '"workbench.colorTheme":.*'
+replace = '"workbench.colorTheme": "{}"'
+
+[apps.fzf]
+file    = "~/.config/fish/functions/fzf.fish"
+pattern = ' --color=.* '
+replace = ' --color="{}" '
+
+[apps.gnomecolorscheme]
+command = "gsettings set org.gnome.desktop.interface color-scheme"
+
+[apps.gtk]
+command = "gsettings set org.gnome.desktop.interface gtk-theme"
+
+[apps.rofi]
+file    = "~/.config/rofi/config.rasi"
+pattern = '@theme ".*'
+replace = '@theme "{}"'
+
+[apps.speedcrunch]
+file    = "~/.config/SpeedCrunch/SpeedCrunch.ini"
+pattern = "^Display\\\\ColorSchemeName=.*"
+replace = "Display\\\\ColorSchemeName={}"
+
+[apps.vscode]
+file    = "~/.config/Code/User/settings.json"
+pattern = '"workbench.colorTheme":.*'
+replace = '"workbench.colorTheme": "{}"'
+
