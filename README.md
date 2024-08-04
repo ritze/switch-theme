@@ -1,5 +1,7 @@
 # switch-theme
-Set the themes for generic applications and frameworks
+
+Set the themes for generic applications and frameworks.
+
 
 ## Config
 
