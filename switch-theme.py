@@ -240,7 +240,7 @@ def main():
     parser = argparse.ArgumentParser(
         prog=prog,
         usage="%(prog)s [options] [theme]",
-        description="Set the themes for Gtk and specific applications.",
+        description="Set the themes for generic applications and frameworks.",
         formatter_class=ListChoicesHelpFormatter,
     )
 
