@@ -89,3 +89,24 @@ command = "gsettings set org.gnome.desktop.interface gtk-theme"
 If switching the theme to *onehalf-dark* the command
 `gsettings set org.gnome.desktop.interface gtk-theme Adwaita-dark` is executed.
 
+
+## State files
+
+For each application the set theme will be written into a state file while the
+file has the application name.
+
+The state directory is `$XDG_STATE_HOME/switch-theme`. If the environment
+variable `XDG_STATE_HOME`` is not set, the default path `$HOME/.local/state`
+for `XDG_STATE_HOME` will be used.
+
+For example if switching the theme *onehalf-dark* and the application bat is
+configured with
+
+```
+[themes.onehalf-dark]
+bat       = "OneHalfDark"
+```
+
+the file `$XDG_STATE_HOME/switch-theme/bat` will be overwritten with the text
+`OneHalfDark`.
+

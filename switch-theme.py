@@ -6,7 +6,8 @@ import re
 import shutil
 import subprocess
 import tomllib
-from os.path import expanduser
+from os import getenv, makedirs
+from os.path import expanduser, isdir
 from tempfile import mkstemp
 
 
@@ -57,6 +58,49 @@ def sed(pattern, replace, file, count=0):
 
     shutil.move(temp, file)
 
+def write(text, file):
+    """Write text into a file.
+
+    If the file exists, it will be overwritten.
+
+    Args:
+        text (str): the text to write into the file
+        file (str): the path to file
+    """
+
+    _, temp = mkstemp()
+    fd = open(temp, "w")
+    fd.write(text)
+    fd.close()
+    shutil.move(temp, file)
+
+
+def set_state(app, theme):
+    """Write the theme into the state file of the app.
+
+    Write the theme into the file "state_dir/app".
+    If the file exists, it will be overwritten.
+
+    Args:
+        app (str):       the application name
+        theme (str):     the theme to switch to
+
+    Returns True if state could be written successfully, otherwise False.
+    """
+    home_dir = getenv("HOME")
+    if not home_dir:
+        print_error("couldn't determine home directory from $HOME. Aborting...")
+        return False
+
+    xdg_state_home = getenv("XDG_STATE_HOME", home_dir + "/.local/state")
+    state_dir = xdg_state_home + "/switch-theme"
+
+    if not isdir(state_dir):
+        makedirs(state_dir)
+
+    write(theme, state_dir + "/" + app)
+
+    return True
 
 def switch_app_theme(app, theme, strategy, verbose=0, suppress_errors=False):
     """Switch the theme of an application.
@@ -70,9 +114,6 @@ def switch_app_theme(app, theme, strategy, verbose=0, suppress_errors=False):
     """
 
     ret = 0
-
-    if verbose >= 2:
-        print("setting {} to {}...".format(app, theme))
 
     if "file" in strategy and "pattern" in strategy and "replace" in strategy:
         file = expanduser(strategy["file"])
@@ -127,8 +168,15 @@ def switch_theme(apps, themes, verbose=0):
         print("used themes configuration:")
         pprint.pprint(themes)
 
-    for app, strategy in apps.items():
-        ret += switch_app_theme(app, themes[app], strategy, verbose)
+    for app in themes:
+        if verbose >= 2:
+            print("setting {} to {}...".format(app, themes[app]))
+
+        if not set_state(app, themes[app]):
+            return 1
+
+        if app in apps:
+            ret += switch_app_theme(app, themes[app], apps[app], verbose)
 
     return 1 if ret > 0 else 0
 
