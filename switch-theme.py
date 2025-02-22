@@ -115,12 +115,6 @@ def switch_app_theme(app, theme, strategy, verbose=0, suppress_errors=False):
 
     ret = 0
 
-    if verbose >= 2:
-        print("setting {} to {}...".format(app, theme))
-
-    if not set_state(app, theme):
-        return 1
-
     if "file" in strategy and "pattern" in strategy and "replace" in strategy:
         file = expanduser(strategy["file"])
         pattern = strategy["pattern"]
@@ -174,8 +168,15 @@ def switch_theme(apps, themes, verbose=0):
         print("used themes configuration:")
         pprint.pprint(themes)
 
-    for app, strategy in apps.items():
-        ret += switch_app_theme(app, themes[app], strategy, verbose)
+    for app in themes:
+        if verbose >= 2:
+            print("setting {} to {}...".format(app, themes[app]))
+
+        if not set_state(app, themes[app]):
+            return 1
+
+        if app in apps:
+            ret += switch_app_theme(app, themes[app], apps[app], verbose)
 
     return 1 if ret > 0 else 0
 
